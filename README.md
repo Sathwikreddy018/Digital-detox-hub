@@ -105,6 +105,7 @@ src/
     rewards.ts       # Reward determination logic
     support.ts       # Support messages & exercises
 
+---
 
 **Running the Project**
 
