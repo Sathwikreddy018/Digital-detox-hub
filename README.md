@@ -107,12 +107,12 @@ src/
 
 ---
 
-###**Running the Project**
+##**Running the Project**
 
-**1.Clone the repository:**
+###**1.Clone the repository:**
 git clone https://github.com/<your-username>/Digital-detox-hub.git
 cd Digital-detox-hub
-
+---
 **2.Install dependencies:**
 npm install
 
