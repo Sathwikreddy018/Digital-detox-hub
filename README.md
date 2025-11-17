@@ -12,79 +12,59 @@ This project was built as part of a college assignment to demonstrate frontend d
 Users can create a customized detox plan with:
 - Plan title  
 - Duration (Today only / 7 Days)  
-- Focus areas (e.g., Instagram, YouTube, Gaming, etc.)  
+- Focus areas (Instagram, YouTube, Gaming, etc.)  
 - Custom focus areas  
 - Replacement activities  
-- Screen-free time blocks (Morning, Night, or custom blocks)  
+- Screen-free time blocks  
 
-All plan data is saved directly in the browser using **localStorage**.
+Plan data is saved in **localStorage**.
 
 ---
 
 ### 📅 2. Daily Check-In (Today Page)
-
-The Today page helps users stay on track:
-
 - Mark completed screen-free time blocks  
-- Check if they did at least one replacement activity  
-- Select how they feel today (Good / Okay / Stressful / Overwhelmed)  
-- View a mood-based supportive message  
-- Everything is saved instantly in localStorage
-
-Daily logs are stored as `DailyLog` objects.
+- Mark whether you completed a replacement activity  
+- Select your mood (Good / Okay / Stressful / Overwhelmed)  
+- View mood-based supportive messages  
+- Everything is auto-saved in localStorage  
 
 ---
 
 ### 📊 3. Progress Page
-
-Shows overall progress across the detox period:
-
-- Total days in the plan  
-- Days successfully completed  
+- Total days  
+- Completed days  
 - Current streak  
 - Progress percentage  
-- A day-by-day visual breakdown (Completed / Partial / Missed)
-
-Progress is calculated using timestamps and stored logs.
+- Daily status breakdown (Completed / Partial / Missed)
 
 ---
 
 ### 🏆 4. Rewards & Badges
-
-A simple gamified reward system includes:
-
 - Daily completion badges  
-- Streak badges (3-day, 5-day, 7-day streaks)  
-- Milestone badges (Full plan completion)  
-- Badges displayed as **earned** or **locked**  
-
-Reward data is stored in localStorage as `RewardData`.
+- 3-day / 5-day / 7-day streak badges  
+- Full-plan completion badge  
+- Earned vs Locked badges display  
 
 ---
 
-### 💙 5. Support Page (Emotional Support)
-
-A dedicated page for guidance and mental wellbeing:
-
-- Mood-aware supportive message  
-- 1-minute breathing exercise  
+### 💙 5. Support Page
+Includes:
+- Mood-based supportive reminder  
+- Breathing exercise  
 - Journaling prompt  
-- Grounding exercise (5-4-3-2-1 technique, etc.)  
-- Extra gentle reminders for motivation  
-
-Designed to give the app a calming, supportive experience.
+- Grounding technique  
+- Extra wellbeing messages  
 
 ---
 
 ## 🛠️ Tech Stack
-
-- **Frontend Framework:** React (TypeScript)  
-- **Build Tool:** Vite  
-- **Routing:** React Router  
-- **Styles:** Tailwind CSS + custom components  
-- **Data Storage:** Browser localStorage  
-- **Icons:** Lucide Icons  
-- **Project Structure:** Modular utilities and types  
+- React + TypeScript  
+- Vite  
+- React Router  
+- Tailwind CSS  
+- Lucide Icons  
+- localStorage for persistence  
+- Modular utility architecture  
 
 ---
 
@@ -92,15 +72,62 @@ Designed to give the app a calming, supportive experience.
 
 ```text
 src/
-  components/        # Navbar + UI components
-  pages/             # All route pages (Create Plan, Today, Progress, Rewards, Support)
+  components/        
+  pages/             
   types/
-    detox.ts         # Plan, Log, Reward, Badge types
+    detox.ts         
   utils/
-    storage.ts       # Read/write to localStorage
-    dates.ts         # Date helpers
-    plan.ts          # Plan creation logic
-    today.ts         # Daily log & mood logic
-    progress.ts      # Progress & streak calculation
-    rewards.ts       # Reward determination logic
-    support.ts       # Support messages & exercises
+    storage.ts       
+    dates.ts         
+    plan.ts          
+    today.ts         
+    progress.ts      
+    rewards.ts       
+    support.ts       
+
+---
+
+## 🚀 **Running the Project**
+
+# 1. Clone the repository
+git clone https://github.com/Sathwikreddy018/Digital-detox-hub.git
+cd Digital-detox-hub
+
+# 2. Install dependencies
+npm install
+
+# 3. Start development server
+npm run dev
+
+# 4. Open the app in browser
+http://localhost:5173/
+
+
+
+## 🧠 **How It Works Internally**
+
+• The detox plan is saved as a DetoxPlan object in localStorage.  
+• Daily logs store completed blocks, activities, and mood.  
+• Progress and streaks are calculated based on date range + logs.  
+• Rewards are computed using completion count and streak logic.  
+• Support messages adapt dynamically to today’s mood.  
+
+
+
+## 🎓 **Use Case (College Project)**
+
+• UI/UX design  
+• Component-based architecture  
+• Routing with React Router  
+• State persistence using localStorage  
+• Utility-driven architecture  
+• A complete functioning wellbeing tool  
+
+
+
+## 🔮 **Future Enhancements (Optional)**
+
+• Login + cloud sync  
+• Push notifications  
+• Exportable reports  
+• Analytics dashboard  
