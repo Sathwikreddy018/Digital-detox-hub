@@ -65,3 +65,58 @@ export type CustomReward = {
   redeemed?: boolean;
   redeemedDate?: string;
 };
+// --- Urge Rescue ---
+
+export type UrgeTrigger =
+  | "boredom"
+  | "stress"
+  | "notification"
+  | "habit"
+  | "social_media_cue"
+  | "other";
+
+export interface UrgeEvent {
+  id: string;
+  planId?: string;   // link to current plan if you have an id
+  date: string;      // "YYYY-MM-DD"
+  time: string;      // "HH:mm"
+  trigger: UrgeTrigger;
+  strength: number;  // 1–5
+  usedAlternative: boolean; // true = resisted, false = gave in
+}
+
+// --- Weekly Reflection ---
+
+export interface WeeklyReflection {
+  id: string;
+  weekStartDate: string; // "YYYY-MM-DD" (e.g., Monday or plan start)
+  createdAt: string;
+  highlight: string;
+  challenge: string;
+  nextWeekFocus: string;
+}
+
+// --- Challenges ---
+
+export type ChallengeId =
+  | "no_morning_social"
+  | "evening_screen_free"
+  | "no_bed_scrolling"
+  | "consistent_week";
+
+export type ChallengeStatus = "locked" | "active" | "completed";
+
+export interface Challenge {
+  id: ChallengeId;
+  title: string;
+  description: string;
+  targetDays: number; // how many days to complete
+}
+
+export interface ChallengeProgress {
+  id: ChallengeId;
+  status: ChallengeStatus;
+  startedAt: string;     // ISO date-time
+  completedAt?: string;  // ISO date-time
+  currentDays: number;   // how many days successfully done so far
+}

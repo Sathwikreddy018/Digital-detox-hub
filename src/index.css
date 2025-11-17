@@ -2,9 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Design system – keep as-is, we just override body later */
 
 @layer base {
   :root {
@@ -102,6 +100,14 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply antialiased;
+
+    /* Dark neon-ish gradient for the entire app */
+    background:
+      radial-gradient(circle at top left, hsl(180 60% 50% / 0.22) 0, transparent 55%),
+      radial-gradient(circle at top right, hsl(150 40% 55% / 0.20) 0, transparent 55%),
+      radial-gradient(circle at bottom, hsl(15 80% 60% / 0.20) 0, transparent 60%),
+      hsl(215 30% 8%);
+    color: #e5e7eb;
   }
 }

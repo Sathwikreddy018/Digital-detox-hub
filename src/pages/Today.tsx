@@ -11,6 +11,7 @@ import { Clock, Heart, Target } from "lucide-react";
 import { DailyLog, DetoxPlan, Mood } from "@/types/detox";
 import { loadPlan, loadLogs, saveLogs } from "@/utils/storage";
 import { getSupportMessage } from "@/utils/support";
+import { UrgeRescue } from "@/components/UrgeRescue";
 
 const TRIGGERS = [
   "Boredom",
@@ -20,6 +21,9 @@ const TRIGGERS = [
   "FOMO",
   "Loneliness",
 ];
+
+const glassCard =
+  "rounded-2xl border border-slate-700/80 bg-slate-900/80 backdrop-blur shadow-lg";
 
 const Today = () => {
   const [plan, setPlan] = useState<DetoxPlan | null>(null);
@@ -37,7 +41,6 @@ const Today = () => {
     saveLogs(logs);
   }, [logs]);
 
-  // Helper: ensure a log exists for today
   const ensureTodayLog = (override?: Partial<DailyLog>): DailyLog => {
     const existingIndex = logs.findIndex((log) => log.date === today);
     if (existingIndex >= 0) {
@@ -62,7 +65,6 @@ const Today = () => {
     }
   };
 
-  // Toggle block
   const handleBlockToggle = (blockId: string) => {
     const index = logs.findIndex((log) => log.date === today);
     if (index >= 0) {
@@ -82,7 +84,6 @@ const Today = () => {
     }
   };
 
-  // Toggle replacement activity
   const handleActivityToggle = () => {
     const index = logs.findIndex((log) => log.date === today);
     if (index >= 0) {
@@ -99,12 +100,10 @@ const Today = () => {
     }
   };
 
-  // Mood change
   const handleMoodChange = (mood: Mood) => {
     ensureTodayLog({ mood });
   };
 
-  // Triggers toggle
   const handleTriggerToggle = (trigger: string) => {
     const index = logs.findIndex((log) => log.date === today);
     if (index >= 0) {
@@ -125,12 +124,10 @@ const Today = () => {
     }
   };
 
-  // Gratitude note
   const handleGratitudeChange = (value: string) => {
     ensureTodayLog({ gratitudeNote: value });
   };
 
-  // Focus sessions
   const handleAddFocusSession = () => {
     const index = logs.findIndex((log) => log.date === today);
     if (index >= 0) {
@@ -154,13 +151,15 @@ const Today = () => {
 
   if (!plan) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <Navbar />
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <Card className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">No Detox Plan Yet</h2>
-            <p className="text-muted-foreground mb-6">
-              Create a detox plan to start tracking your progress
+          <Card className={`p-8 text-center ${glassCard}`}>
+            <h2 className="text-2xl font-bold mb-4 text-slate-50">
+              No Detox Plan Yet
+            </h2>
+            <p className="text-sm text-slate-300 mb-6">
+              Create a detox plan to start tracking your progress.
             </p>
             <Link to="/create-plan">
               <Button>Create Plan</Button>
@@ -177,68 +176,97 @@ const Today = () => {
   const focusSessions = todayLog?.focusSessions ?? 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header */}
-        <section>
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            {plan.title}
-          </h1>
-          <p className="text-muted-foreground">
-            {new Date(today).toLocaleDateString("en-US", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>
+        <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-50 mb-1">
+              {plan.title}
+            </h1>
+            <p className="text-sm text-slate-300">
+              {new Date(today).toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+          </div>
+
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-2">
+              <UrgeRescue planId={(plan as any)?.id} />
+              <Link to="/support">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-slate-200 hover:bg-slate-900/60"
+                >
+                  Need support?
+                </Button>
+              </Link>
+            </div>
+            <span className="text-[11px] text-slate-400">
+              Today is day{" "}
+              <span className="font-medium">
+                {plan.currentDay ?? "?"}
+              </span>{" "}
+              of your plan
+            </span>
+          </div>
         </section>
 
-        {/* Summary + Focus */}
-        <section className="grid gap-4 md:grid-cols-2">
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4">Today's Summary</h2>
-            <div className="space-y-3 text-sm">
+        {/* Top summary */}
+        <section className="grid gap-4 md:grid-cols-3">
+          <Card className={`p-5 ${glassCard}`}>
+            <h2 className="text-sm font-semibold mb-3 text-slate-100">
+              Today at a glance
+            </h2>
+            <div className="space-y-3 text-sm text-slate-200">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  Time blocks completed:
+                <span className="text-slate-400">
+                  Time blocks completed
                 </span>
                 <span className="font-semibold">
                   {completedBlocksCount}/{totalBlocks}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  Activity completed:
+                <span className="text-slate-400">
+                  Replacement activity
                 </span>
                 <span className="font-semibold">
                   {todayLog?.didActivity ? "Yes" : "No"}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  Focus sessions today:
+                <span className="text-slate-400">
+                  Focus sessions today
                 </span>
                 <span className="font-semibold">{focusSessions}</span>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className={`p-5 md:col-span-2 ${glassCard}`}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Target className="w-5 h-5 text-primary" />
-                <h2 className="text-lg font-semibold">Focus Mode</h2>
+                <h2 className="text-sm font-semibold text-slate-50">
+                  Focus Mode
+                </h2>
               </div>
-              <span className="text-xs text-muted-foreground">
-                Each session = intentional screen-free time
+              <span className="text-[11px] text-slate-400">
+                Each logged session = intentional screen-free focus sprint
               </span>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-slate-300 mb-4">
               When you decide to focus (for example, 25–30 minutes away from
-              your phone), log a focus session here.
+              your phone), log a focus session. Over time, this builds your
+              focus streak alongside your detox streak.
             </p>
             <Button variant="outline" onClick={handleAddFocusSession}>
               + Log a focus session
@@ -246,170 +274,199 @@ const Today = () => {
           </Card>
         </section>
 
-        {/* Focus areas */}
-        {plan.focusAreas.length > 0 && (
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-3">Focus Areas</h2>
-            <div className="flex flex-wrap gap-2">
-              {plan.focusAreas.map((area) => (
-                <Badge key={area} variant="secondary">
-                  {area}
-                </Badge>
-              ))}
-            </div>
-          </Card>
-        )}
+        {/* Main grid */}
+        <section className="grid gap-6 lg:grid-cols-[1.4fr,1.1fr]">
+          <div className="space-y-6">
+            {/* Screen-free time blocks */}
+            <Card className={`p-6 ${glassCard}`}>
+              <h2 className="text-lg font-semibold mb-4 text-slate-50">
+                Screen-free time blocks
+              </h2>
+              <div className="space-y-3">
+                {plan.timeBlocks.map((block) => {
+                  const isCompleted =
+                    todayLog?.completedBlocks.includes(block.id) || false;
 
-        {/* Replacement activities */}
-        {plan.activities.length > 0 && (
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-3">
-              Replacement Activities
-            </h2>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              {plan.activities.map((activity, idx) => (
-                <li key={idx} className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                  {activity}
-                </li>
-              ))}
-            </ul>
-          </Card>
-        )}
-
-        {/* Screen-free time blocks */}
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-4">
-            Screen-Free Time Blocks
-          </h2>
-          <div className="space-y-3">
-            {plan.timeBlocks.map((block) => {
-              const isCompleted =
-                todayLog?.completedBlocks.includes(block.id) || false;
-
-              return (
-                <div
-                  key={block.id}
-                  className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-muted-foreground" />
-                    <div>
-                      <p className="font-medium">{block.label}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {block.start} – {block.end}
-                      </p>
+                  return (
+                    <div
+                      key={block.id}
+                      className="flex items-center justify-between p-4 border border-slate-700 rounded-xl bg-slate-900/80 hover:bg-slate-800/80 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Clock className="w-5 h-5 text-slate-400" />
+                        <div>
+                          <p className="font-medium text-slate-100">
+                            {block.label}
+                          </p>
+                          <p className="text-sm text-slate-400">
+                            {block.start} – {block.end}
+                          </p>
+                        </div>
+                      </div>
+                      <Checkbox
+                        checked={isCompleted}
+                        onCheckedChange={() => handleBlockToggle(block.id)}
+                      />
                     </div>
-                  </div>
-                  <Checkbox
-                    checked={isCompleted}
-                    onCheckedChange={() => handleBlockToggle(block.id)}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-
-        {/* Replacement activity toggle */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold">Replacement Activity</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Did you do at least one replacement activity today?
-              </p>
-            </div>
-            <Checkbox
-              checked={todayLog?.didActivity || false}
-              onCheckedChange={handleActivityToggle}
-            />
-          </div>
-        </Card>
-
-        {/* Mood */}
-        <Card className="p-6">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold mb-2">How are you feeling?</h2>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { value: "good", label: "Good", emoji: "😊" },
-              { value: "okay", label: "Okay", emoji: "😌" },
-              { value: "stressful", label: "Stressful", emoji: "😰" },
-              { value: "overwhelmed", label: "Overwhelmed", emoji: "😔" },
-            ].map((mood) => (
-              <button
-                key={mood.value}
-                onClick={() => handleMoodChange(mood.value as Mood)}
-                className={`p-4 rounded-lg border-2 transition-all hover:scale-105 ${
-                  todayLog?.mood === mood.value
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <div className="text-3xl mb-2">{mood.emoji}</div>
-                <div className="text-sm font-medium">{mood.label}</div>
-              </button>
-            ))}
-          </div>
-        </Card>
-
-        {/* Triggers */}
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-2">
-            What tempted you today?
-          </h2>
-          <p className="text-sm text-muted-foreground mb-3">
-            Select anything that made it harder to stay off screens.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {TRIGGERS.map((t) => {
-              const active = todaysTriggers.includes(t);
-              return (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => handleTriggerToggle(t)}
-                  className={`px-3 py-1 rounded-full text-sm border transition-all ${
-                    active
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-muted text-foreground border-border hover:border-primary/50"
-                  }`}
-                >
-                  {t}
-                </button>
-              );
-            })}
-          </div>
-        </Card>
-
-        {/* Gratitude */}
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-2">Gratitude note</h2>
-          <p className="text-sm text-muted-foreground mb-3">
-            Write one good thing about today. It can be very small.
-          </p>
-          <Textarea
-            rows={3}
-            placeholder="I felt good when..."
-            value={todayLog?.gratitudeNote ?? ""}
-            onChange={(e) => handleGratitudeChange(e.target.value)}
-          />
-        </Card>
-
-        {/* Support message */}
-        {supportMessage && (
-          <Card className="p-6 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
-            <div className="flex items-start gap-3">
-              <Heart className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-              <div>
-                <h3 className="font-semibold mb-2">{supportMessage.title}</h3>
-                <p className="text-muted-foreground">{supportMessage.body}</p>
+                  );
+                })}
               </div>
-            </div>
-          </Card>
-        )}
+            </Card>
+
+            {/* Replacement activity */}
+            <Card className={`p-6 space-y-4 ${glassCard}`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-50">
+                    Replacement activity
+                  </h2>
+                  <p className="text-sm text-slate-300 mt-1">
+                    Did you do at least one replacement activity today?
+                  </p>
+                </div>
+                <Checkbox
+                  checked={todayLog?.didActivity || false}
+                  onCheckedChange={handleActivityToggle}
+                />
+              </div>
+
+              {plan.activities.length > 0 && (
+                <div className="border-t border-slate-700 pt-3">
+                  <p className="text-xs font-medium text-slate-400 mb-2">
+                    Your go-to alternatives
+                  </p>
+                  <ul className="space-y-1.5 text-sm text-slate-200">
+                    {plan.activities.map((activity, idx) => (
+                      <li key={idx} className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                        {activity}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </Card>
+          </div>
+
+          <div className="space-y-6">
+            {/* Focus areas */}
+            {plan.focusAreas.length > 0 && (
+              <Card className={`p-6 ${glassCard}`}>
+                <h2 className="text-lg font-semibold mb-3 text-slate-50">
+                  Focus areas
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {plan.focusAreas.map((area) => (
+                    <Badge
+                      key={area}
+                      variant="secondary"
+                      className="bg-slate-800 text-slate-50 border-slate-600"
+                    >
+                      {area}
+                    </Badge>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* Mood */}
+            <Card className={`p-6 ${glassCard}`}>
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold mb-1 text-slate-50">
+                  How are you feeling?
+                </h2>
+                <p className="text-sm text-slate-300">
+                  Your mood helps the support tips and progress insights.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { value: "good", label: "Good", emoji: "😊" },
+                  { value: "okay", label: "Okay", emoji: "😌" },
+                  { value: "stressful", label: "Stressful", emoji: "😰" },
+                  { value: "overwhelmed", label: "Overwhelmed", emoji: "😔" },
+                ].map((mood) => (
+                  <button
+                    key={mood.value}
+                    onClick={() => handleMoodChange(mood.value as Mood)}
+                    className={`p-4 rounded-xl border-2 text-left transition-all hover:scale-[1.02] ${
+                      todayLog?.mood === mood.value
+                        ? "border-primary bg-slate-900/90 shadow-sm"
+                        : "border-slate-700 bg-slate-900/70 hover:border-primary/60"
+                    }`}
+                  >
+                    <div className="text-2xl mb-1">{mood.emoji}</div>
+                    <div className="text-sm font-medium text-slate-100">
+                      {mood.label}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </Card>
+
+            {/* Triggers */}
+            <Card className={`p-6 ${glassCard}`}>
+              <h2 className="text-lg font-semibold mb-2 text-slate-50">
+                What tempted you today?
+              </h2>
+              <p className="text-sm text-slate-300 mb-3">
+                Select anything that made it harder to stay off screens.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {TRIGGERS.map((t) => {
+                  const active = todaysTriggers.includes(t);
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => handleTriggerToggle(t)}
+                      className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
+                        active
+                          ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                          : "bg-slate-900/60 text-slate-100 border-slate-700 hover:border-primary/60"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
+            </Card>
+
+            {/* Gratitude + support */}
+            <Card className={`p-6 space-y-4 ${glassCard}`}>
+              <div>
+                <h2 className="text-lg font-semibold mb-1 text-slate-50">
+                  Gratitude note
+                </h2>
+                <p className="text-sm text-slate-300 mb-2">
+                  Write one good thing about today. It can be very small.
+                </p>
+                <Textarea
+                  rows={3}
+                  placeholder="I felt good when..."
+                  value={todayLog?.gratitudeNote ?? ""}
+                  onChange={(e) => handleGratitudeChange(e.target.value)}
+                  className="bg-slate-900/80 border-slate-700 text-slate-100"
+                />
+              </div>
+
+              {supportMessage && (
+                <div className="mt-2 rounded-xl border border-rose-400/40 bg-rose-500/10 p-4 flex items-start gap-3">
+                  <Heart className="w-5 h-5 text-rose-300 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-sm mb-1 text-rose-50">
+                      {supportMessage.title}
+                    </h3>
+                    <p className="text-xs text-rose-100/90">
+                      {supportMessage.body}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </Card>
+          </div>
+        </section>
       </main>
     </div>
   );

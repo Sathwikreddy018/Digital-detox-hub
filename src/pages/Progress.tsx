@@ -6,6 +6,11 @@ import Navbar from "@/components/Navbar";
 import { CheckCircle2, XCircle, TrendingUp, Activity } from "lucide-react";
 
 import { loadPlan, loadLogs } from "@/utils/storage";
+import { CravingInsightsCard } from "@/components/CravingInsightsCard";
+import { WeeklyReflectionCard } from "@/components/WeeklyReflectionCard";
+
+const glassCard =
+  "rounded-2xl border border-slate-700/80 bg-slate-900/80 backdrop-blur shadow-lg";
 
 const ProgressPage = () => {
   const plan = loadPlan();
@@ -13,14 +18,16 @@ const ProgressPage = () => {
 
   if (!plan) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <Navbar />
 
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <Card className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">No Detox Plan Yet</h2>
-            <p className="text-muted-foreground mb-6">
-              Create a detox plan to start tracking progress
+          <Card className={`p-8 text-center ${glassCard}`}>
+            <h2 className="text-2xl font-bold mb-4 text-slate-50">
+              No Detox Plan Yet
+            </h2>
+            <p className="text-sm text-slate-300 mb-6">
+              Create a detox plan to start tracking progress.
             </p>
             <Link to="/create-plan">
               <Button>Create Plan</Button>
@@ -31,7 +38,6 @@ const ProgressPage = () => {
     );
   }
 
-  // Reuse your previous stats logic quickly
   const getStats = (planStartDate: string, planEndDate: string, logs: any[]) => {
     const start = new Date(planStartDate);
     const end = new Date(planEndDate);
@@ -120,17 +126,13 @@ const ProgressPage = () => {
     const d = new Date(log.date);
     if (d < sevenDaysAgo || d > today) return;
 
-    // blocks
     weeklyBlocks += log.completedBlocks?.length ?? 0;
-    // activity days
     if (log.didActivity) weeklyDaysWithActivity++;
 
-    // mood
     if (log.mood) {
       moodCounts[log.mood] = (moodCounts[log.mood] || 0) + 1;
     }
 
-    // triggers
     if (log.triggers && Array.isArray(log.triggers)) {
       log.triggers.forEach((t: string) => {
         triggerCounts[t] = (triggerCounts[t] || 0) + 1;
@@ -148,108 +150,112 @@ const ProgressPage = () => {
     .slice(0, 3)
     .map(([name, count]) => `${name} (${count})`);
 
+  const weekStartISO = sevenDaysAgo.toISOString().split("T")[0];
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-50 mb-2">
             Your Progress
           </h1>
-          <p className="text-muted-foreground">
-            Track your digital detox journey
+          <p className="text-sm text-slate-300">
+            Track your digital detox journey over time.
           </p>
         </div>
 
         <div className="grid gap-6">
           {/* Stats cards */}
           <div className="grid sm:grid-cols-3 gap-4">
-            <Card className="p-6">
+            <Card className={`p-6 ${glassCard}`}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-300" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{stats.completedDays}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Completed Days
+                  <p className="text-2xl font-bold text-slate-50">
+                    {stats.completedDays}
                   </p>
+                  <p className="text-xs text-slate-300">Completed days</p>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className={`p-6 ${glassCard}`}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-accent" />
+                <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-cyan-300" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{stats.streak}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Current Streak
+                  <p className="text-2xl font-bold text-slate-50">
+                    {stats.streak}
                   </p>
+                  <p className="text-xs text-slate-300">Current streak</p>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className={`p-6 ${glassCard}`}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center">
-                  <span className="text-secondary font-bold text-lg">
+                <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                  <span className="text-amber-200 font-bold text-lg">
                     {stats.totalDays}
                   </span>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">
+                  <p className="text-2xl font-bold text-slate-50">
                     {Math.round(progressPercentage)}%
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    Total Progress
-                  </p>
+                  <p className="text-xs text-slate-300">Total progress</p>
                 </div>
               </div>
             </Card>
           </div>
 
           {/* Weekly summary */}
-          <Card className="p-6">
+          <Card className={`p-6 ${glassCard}`}>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                 <Activity className="w-5 h-5 text-primary" />
               </div>
-              <h2 className="text-lg font-semibold">Weekly Summary (Last 7 days)</h2>
+              <h2 className="text-lg font-semibold text-slate-50">
+                Weekly summary (last 7 days)
+              </h2>
             </div>
             <div className="grid sm:grid-cols-3 gap-4 text-sm">
               <div>
-                <p className="text-muted-foreground">Blocks completed</p>
-                <p className="text-xl font-semibold">{weeklyBlocks}</p>
+                <p className="text-slate-400">Blocks completed</p>
+                <p className="text-xl font-semibold text-slate-50">
+                  {weeklyBlocks}
+                </p>
               </div>
               <div>
-                <p className="text-muted-foreground">
+                <p className="text-slate-400">
                   Days with replacement activity
                 </p>
-                <p className="text-xl font-semibold">
+                <p className="text-xl font-semibold text-slate-50">
                   {weeklyDaysWithActivity}
                 </p>
               </div>
               <div>
-                <p className="text-muted-foreground">Most common mood</p>
-                <p className="text-xl font-semibold capitalize">
+                <p className="text-slate-400">Most common mood</p>
+                <p className="text-xl font-semibold capitalize text-slate-50">
                   {mostCommonMood}
                 </p>
               </div>
             </div>
             {topTriggers.length > 0 && (
               <div className="mt-4">
-                <p className="text-sm text-muted-foreground mb-1">
+                <p className="text-xs text-slate-400 mb-1">
                   Top triggers this week:
                 </p>
-                <div className="flex flex-wrap gap-2 text-sm">
+                <div className="flex flex-wrap gap-2 text-xs">
                   {topTriggers.map((t) => (
                     <span
                       key={t}
-                      className="px-3 py-1 rounded-full bg-muted text-foreground"
+                      className="px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700 text-slate-100"
                     >
                       {t}
                     </span>
@@ -259,25 +265,38 @@ const ProgressPage = () => {
             )}
           </Card>
 
+          {/* Craving insights + Weekly reflection */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <CravingInsightsCard planId={(plan as any)?.id} />
+            <WeeklyReflectionCard weekStartDate={weekStartISO} />
+          </div>
+
           {/* Overall progress */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4">Overall Progress</h2>
+          <Card className={`p-6 ${glassCard}`}>
+            <h2 className="text-lg font-semibold mb-4 text-slate-50">
+              Overall progress
+            </h2>
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">
+              <div className="flex justify-between text-xs text-slate-300">
+                <span>
                   {stats.completedDays} of {stats.totalDays} days completed
                 </span>
-                <span className="font-medium">
+                <span className="font-medium text-slate-50">
                   {Math.round(progressPercentage)}%
                 </span>
               </div>
-              <Progress value={progressPercentage} className="h-2" />
+              <Progress
+                value={progressPercentage}
+                className="h-2 bg-slate-800"
+              />
             </div>
           </Card>
 
           {/* Daily breakdown */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4">Daily Breakdown</h2>
+          <Card className={`p-6 ${glassCard}`}>
+            <h2 className="text-lg font-semibold mb-4 text-slate-50">
+              Daily breakdown
+            </h2>
             <div className="grid grid-cols-7 gap-2">
               {daysList.map((day) => {
                 const dateStr = day.toISOString().split("T")[0];
@@ -286,36 +305,36 @@ const ProgressPage = () => {
                 return (
                   <div
                     key={dateStr}
-                    className="aspect-square flex flex-col items-center justify-center p-2 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                    className="aspect-square flex flex-col items-center justify-center p-2 rounded-lg border border-slate-700 bg-slate-950/60 hover:bg-slate-900/80 transition-colors"
                   >
-                    <span className="text-xs text-muted-foreground mb-1">
+                    <span className="text-[11px] text-slate-400 mb-1">
                       {day.getDate()}
                     </span>
                     {status === "completed" && (
-                      <CheckCircle2 className="w-5 h-5 text-success" />
+                      <CheckCircle2 className="w-5 h-5 text-emerald-300" />
                     )}
                     {status === "partial" && (
-                      <div className="w-5 h-5 rounded-full border-2 border-accent" />
+                      <div className="w-5 h-5 rounded-full border-2 border-cyan-300" />
                     )}
                     {status === "none" && (
-                      <XCircle className="w-5 h-5 text-muted-foreground/30" />
+                      <XCircle className="w-5 h-5 text-slate-700" />
                     )}
                   </div>
                 );
               })}
             </div>
-            <div className="flex items-center justify-center gap-6 mt-6 text-sm">
+            <div className="flex items-center justify-center gap-6 mt-6 text-xs text-slate-300">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-success" />
-                <span className="text-muted-foreground">Completed</span>
+                <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                <span>Completed</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full border-2 border-accent" />
-                <span className="text-muted-foreground">Partial</span>
+                <div className="w-4 h-4 rounded-full border-2 border-cyan-300" />
+                <span>Partial</span>
               </div>
               <div className="flex items-center gap-2">
-                <XCircle className="w-4 h-4 text-muted-foreground/30" />
-                <span className="text-muted-foreground">Missed</span>
+                <XCircle className="w-4 h-4 text-slate-700" />
+                <span>Missed</span>
               </div>
             </div>
           </Card>

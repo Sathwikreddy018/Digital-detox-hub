@@ -7,10 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { PiggyBank, Gift, Sparkles } from "lucide-react";
 
-import { loadLogs } from "@/utils/storage"; // if you still use "@/lib/storage", change this import
+import { loadLogs } from "@/utils/storage";
 import type { DailyLog } from "@/types/detox";
 
-// Local type for this page (you can also reuse CustomReward from types if you prefer)
 type CustomReward = {
   id: string;
   title: string;
@@ -27,22 +26,22 @@ function isLogCompleted(log: DailyLog): boolean {
   return (log.completedBlocks?.length ?? 0) > 0 && log.didActivity === true;
 }
 
+const glassCard =
+  "rounded-2xl border border-slate-700/80 bg-slate-900/80 backdrop-blur shadow-lg";
+
 const RewardWallet = () => {
   const [rewards, setRewards] = useState<CustomReward[]>([]);
   const [title, setTitle] = useState("");
   const [cost, setCost] = useState<string>("");
   const [description, setDescription] = useState("");
 
-  // Load logs to compute coins
   const logs = loadLogs();
 
-  // Compute total coins earned from logs
   const totalCoins = useMemo(() => {
     const completedDays = logs.filter(isLogCompleted).length;
     return completedDays * COINS_PER_COMPLETED_DAY;
   }, [logs]);
 
-  // Coins already "spent" on redeemed rewards
   const spentCoins = useMemo(() => {
     return rewards
       .filter((r) => r.redeemed)
@@ -51,7 +50,6 @@ const RewardWallet = () => {
 
   const availableCoins = totalCoins - spentCoins;
 
-  // Load rewards from localStorage on mount
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -64,7 +62,6 @@ const RewardWallet = () => {
     }
   }, []);
 
-  // Save rewards whenever they change
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(rewards));
   }, [rewards]);
@@ -107,7 +104,11 @@ const RewardWallet = () => {
   };
 
   const handleResetRedemptions = () => {
-    if (!confirm("Reset all redemptions? This will mark all rewards as unredeemed.")) {
+    if (
+      !confirm(
+        "Reset all redemptions? This will mark all rewards as unredeemed."
+      )
+    ) {
       return;
     }
     setRewards((prev) =>
@@ -123,95 +124,116 @@ const RewardWallet = () => {
   const redeemedRewards = rewards.filter((r) => r.redeemed);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header */}
         <section>
-          <h1 className="text-3xl font-bold mb-2">Detox Coins & Reward Wallet</h1>
-          <p className="text-muted-foreground max-w-2xl text-sm">
-            Every day you complete your detox tasks, you earn <strong>Detox Coins</strong>.
-            Use those coins to redeem meaningful rewards that you choose for yourself.
+          <h1 className="text-3xl font-bold mb-2 text-slate-50">
+            Detox Coins & Reward Wallet
+          </h1>
+          <p className="text-sm text-slate-300 max-w-2xl">
+            Every day you complete your detox tasks, you earn{" "}
+            <span className="font-semibold">Detox Coins</span>. Use those coins
+            to redeem meaningful rewards you choose for yourself.
           </p>
         </section>
 
         {/* Coins summary */}
         <section className="grid gap-4 md:grid-cols-3">
-          <Card className="p-6 flex items-center gap-3">
-            <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center">
+          <Card className={`p-6 flex items-center gap-3 ${glassCard}`}>
+            <div className="w-11 h-11 rounded-full bg-primary/20 flex items-center justify-center">
               <PiggyBank className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                Total Coins Earned
+              <p className="text-[11px] text-slate-400 uppercase tracking-wide">
+                Total coins earned
               </p>
-              <p className="text-2xl font-semibold">{totalCoins}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-2xl font-semibold text-slate-50">
+                {totalCoins}
+              </p>
+              <p className="text-xs text-slate-400">
                 {COINS_PER_COMPLETED_DAY} coins / completed day
               </p>
             </div>
           </Card>
 
-          <Card className="p-6 flex items-center gap-3">
-            <div className="w-11 h-11 rounded-full bg-secondary/10 flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-secondary" />
+          <Card className={`p-6 flex items-center gap-3 ${glassCard}`}>
+            <div className="w-11 h-11 rounded-full bg-emerald-500/20 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-emerald-300" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                Available Coins
+              <p className="text-[11px] text-slate-400 uppercase tracking-wide">
+                Available coins
               </p>
-              <p className="text-2xl font-semibold">{availableCoins}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-2xl font-semibold text-slate-50">
+                {availableCoins}
+              </p>
+              <p className="text-xs text-slate-400">
                 You can spend these on rewards
               </p>
             </div>
           </Card>
 
-          <Card className="p-6 flex items-center gap-3">
-            <div className="w-11 h-11 rounded-full bg-accent/10 flex items-center justify-center">
-              <Gift className="w-6 h-6 text-accent" />
+          <Card className={`p-6 flex items-center gap-3 ${glassCard}`}>
+            <div className="w-11 h-11 rounded-full bg-amber-500/20 flex items-center justify-center">
+              <Gift className="w-6 h-6 text-amber-300" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                Rewards Redeemed
+              <p className="text-[11px] text-slate-400 uppercase tracking-wide">
+                Rewards redeemed
               </p>
-              <p className="text-2xl font-semibold">{redeemedRewards.length}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-2xl font-semibold text-slate-50">
+                {redeemedRewards.length}
+              </p>
+              <p className="text-xs text-slate-400">
                 You&apos;ve already treated yourself
               </p>
             </div>
           </Card>
         </section>
 
-        {/* Create reward form */}
+        {/* Create reward form + active rewards */}
         <section className="grid gap-4 md:grid-cols-[2fr,3fr]">
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-3">Create a new reward</h2>
-            <p className="text-xs text-muted-foreground mb-4">
-              Define small or big rewards you want to give yourself when you stay
-              consistent with your detox.
+          <Card className={`p-6 ${glassCard}`}>
+            <h2 className="text-lg font-semibold mb-3 text-slate-50">
+              Create a new reward
+            </h2>
+            <p className="text-xs text-slate-300 mb-4">
+              Define small or big rewards you want to give yourself when you
+              stay consistent with your detox.
             </p>
 
             <div className="space-y-3 text-sm">
               <div>
-                <Label htmlFor="reward-title">Reward name</Label>
+                <Label
+                  htmlFor="reward-title"
+                  className="text-xs text-slate-200"
+                >
+                  Reward name
+                </Label>
                 <Input
                   id="reward-title"
                   placeholder="Example: Movie night, Pizza treat"
-                  className="mt-1"
+                  className="mt-1 bg-slate-950/70 border-slate-700 text-slate-100 placeholder:text-slate-500"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
 
               <div>
-                <Label htmlFor="reward-cost">Cost (coins)</Label>
+                <Label
+                  htmlFor="reward-cost"
+                  className="text-xs text-slate-200"
+                >
+                  Cost (coins)
+                </Label>
                 <Input
                   id="reward-cost"
                   type="number"
                   min={1}
-                  className="mt-1"
+                  className="mt-1 bg-slate-950/70 border-slate-700 text-slate-100 placeholder:text-slate-500"
                   placeholder="Example: 50"
                   value={cost}
                   onChange={(e) => setCost(e.target.value)}
@@ -219,11 +241,16 @@ const RewardWallet = () => {
               </div>
 
               <div>
-                <Label htmlFor="reward-desc">Description (optional)</Label>
+                <Label
+                  htmlFor="reward-desc"
+                  className="text-xs text-slate-200"
+                >
+                  Description (optional)
+                </Label>
                 <Input
                   id="reward-desc"
                   placeholder="Example: Order my favourite pizza on Sunday"
-                  className="mt-1"
+                  className="mt-1 bg-slate-950/70 border-slate-700 text-slate-100 placeholder:text-slate-500"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
@@ -231,13 +258,14 @@ const RewardWallet = () => {
 
               <div className="pt-2 flex items-center justify-between">
                 <Button size="sm" onClick={handleAddReward}>
-                  Add Reward
+                  Add reward
                 </Button>
                 {rewards.length > 0 && (
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
+                    className="text-slate-300 hover:bg-slate-900/70"
                     onClick={handleResetRedemptions}
                   >
                     Reset redemptions
@@ -247,12 +275,14 @@ const RewardWallet = () => {
             </div>
           </Card>
 
-          {/* Active rewards */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-3">Available rewards</h2>
+          <Card className={`p-6 ${glassCard}`}>
+            <h2 className="text-lg font-semibold mb-3 text-slate-50">
+              Available rewards
+            </h2>
             {activeRewards.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                You haven&apos;t created any rewards yet. Start by adding one on the left.
+              <p className="text-sm text-slate-300">
+                You haven&apos;t created any rewards yet. Start by adding one on
+                the left.
               </p>
             ) : (
               <div className="space-y-3">
@@ -261,17 +291,20 @@ const RewardWallet = () => {
                   return (
                     <div
                       key={reward.id}
-                      className="flex items-start justify-between gap-3 border border-border rounded-lg p-3"
+                      className="flex items-start justify-between gap-3 border border-slate-700 rounded-lg p-3 bg-slate-950/70"
                     >
                       <div>
-                        <p className="font-medium flex items-center gap-2">
+                        <p className="font-medium flex items-center gap-2 text-slate-50">
                           {reward.title}
-                          <Badge variant="outline">
+                          <Badge
+                            variant="outline"
+                            className="border-slate-600 text-slate-200"
+                          >
                             {reward.cost} coins
                           </Badge>
                         </p>
                         {reward.description && (
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-xs text-slate-300 mt-1">
                             {reward.description}
                           </p>
                         )}
@@ -295,30 +328,32 @@ const RewardWallet = () => {
         {/* Redeemed rewards history */}
         {redeemedRewards.length > 0 && (
           <section>
-            <Card className="p-6">
-              <h2 className="text-lg font-semibold mb-3">
+            <Card className={`p-6 ${glassCard}`}>
+              <h2 className="text-lg font-semibold mb-3 text-slate-50">
                 Rewards you&apos;ve already redeemed
               </h2>
               <div className="space-y-2 text-sm">
                 {redeemedRewards.map((reward) => (
                   <div
                     key={reward.id}
-                    className="flex items-center justify-between border border-border rounded-lg p-3 bg-muted/60"
+                    className="flex items-center justify-between border border-slate-700 rounded-lg p-3 bg-slate-950/70"
                   >
                     <div>
-                      <p className="font-medium">{reward.title}</p>
+                      <p className="font-medium text-slate-50">
+                        {reward.title}
+                      </p>
                       {reward.description && (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-slate-300">
                           {reward.description}
                         </p>
                       )}
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-slate-400">
                         Cost: {reward.cost} coins
                       </p>
                       {reward.redeemedDate && (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-slate-400">
                           Redeemed on{" "}
                           {new Date(
                             reward.redeemedDate

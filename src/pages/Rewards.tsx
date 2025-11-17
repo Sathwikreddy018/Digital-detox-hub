@@ -9,6 +9,10 @@ import { calculateRewardData, useGraceDayForToday } from "@/utils/rewards";
 import type { Badge as BadgeType, RewardData } from "@/types/detox";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { ChallengesPanel } from "@/components/ChallengesPanel";
+
+const glassCard =
+  "rounded-2xl border border-slate-700/80 bg-slate-900/80 backdrop-blur shadow-lg";
 
 const Rewards = () => {
   const plan = loadPlan();
@@ -58,13 +62,15 @@ const Rewards = () => {
 
   if (!plan) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <Navbar />
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <Card className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">No Detox Plan Yet</h2>
-            <p className="text-muted-foreground mb-6">
-              Create a detox plan to start earning rewards
+          <Card className={`p-8 text-center ${glassCard}`}>
+            <h2 className="text-2xl font-bold mb-4 text-slate-50">
+              No Detox Plan Yet
+            </h2>
+            <p className="text-sm text-slate-300 mb-6">
+              Create a detox plan to start earning rewards.
             </p>
             <Link to="/create-plan">
               <Button>Create Plan</Button>
@@ -82,84 +88,93 @@ const Rewards = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-50 mb-2">
             Your Rewards
           </h1>
-          <p className="text-muted-foreground">
-            Celebrate your digital detox achievements
+          <p className="text-sm text-slate-300">
+            Celebrate your digital detox achievements and streaks.
           </p>
         </div>
 
         {/* Summary cards */}
-        <div className="grid sm:grid-cols-3 gap-4 mb-8">
-          <Card className="p-6">
+        <div className="grid sm:grid-cols-3 gap-4">
+          <Card className={`p-6 ${glassCard}`}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
-                <Trophy className="w-5 h-5 text-accent" />
+              <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                <Trophy className="w-5 h-5 text-emerald-300" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{earnedBadges.length}</p>
-                <p className="text-sm text-muted-foreground">Badges Earned</p>
+                <p className="text-2xl font-bold text-slate-50">
+                  {earnedBadges.length}
+                </p>
+                <p className="text-xs text-slate-300">Badges earned</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className={`p-6 ${glassCard}`}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <Flame className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
+                <Flame className="w-5 h-5 text-orange-300" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{rewards.currentStreak}</p>
-                <p className="text-sm text-muted-foreground">Current Streak</p>
+                <p className="text-2xl font-bold text-slate-50">
+                  {rewards.currentStreak}
+                </p>
+                <p className="text-xs text-slate-300">Current streak</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className={`p-6 ${glassCard}`}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center">
-                <Award className="w-5 h-5 text-secondary" />
+              <div className="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center">
+                <Award className="w-5 h-5 text-cyan-300" />
               </div>
               <div>
-                <p className="text-2xl font-bold">
+                <p className="text-2xl font-bold text-slate-50">
                   {rewards.totalDaysCompleted}
                 </p>
-                <p className="text-sm text-muted-foreground">Days Completed</p>
+                <p className="text-xs text-slate-300">Days completed</p>
               </div>
             </div>
           </Card>
         </div>
 
         {/* Grace Day card */}
-        <Card className="p-6 mb-8">
+        <Card className={`p-6 ${glassCard}`}>
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-              <HeartHandshake className="w-5 h-5 text-primary" />
+            <div className="w-10 h-10 bg-rose-500/20 rounded-full flex items-center justify-center">
+              <HeartHandshake className="w-5 h-5 text-rose-300" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold">Grace Day</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 className="text-lg font-semibold text-slate-50">
+                Grace Day
+              </h2>
+              <p className="text-sm text-slate-300">
                 Once per plan, you can use a Grace Day to be kind to yourself if
-                you miss a day.
+                you miss a day without breaking your streak.
               </p>
             </div>
           </div>
           {rewards.graceDayUsed ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-slate-300">
               Grace Day already used on{" "}
-              <span className="font-medium">
+              <span className="font-medium text-slate-50">
                 {rewards.graceDayDate
-                  ? new Date(rewards.graceDayDate).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
+                  ? new Date(rewards.graceDayDate).toLocaleDateString(
+                      "en-US",
+                      {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }
+                    )
                   : "this plan"}
               </span>
               .
@@ -171,27 +186,35 @@ const Rewards = () => {
           )}
         </Card>
 
+        {/* Detox Challenges */}
+        <ChallengesPanel />
+
         {/* Earned badges */}
         {earnedBadges.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Earned Badges</h2>
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold text-slate-50">
+              Earned badges
+            </h2>
             <div className="grid sm:grid-cols-2 gap-4">
               {earnedBadges.map((badge) => (
                 <Card
                   key={badge.id}
-                  className="p-6 hover:shadow-lg transition-shadow bg-gradient-to-br from-card to-accent/5"
+                  className={`p-6 ${glassCard} bg-gradient-to-br from-slate-900/80 to-emerald-900/30`}
                 >
                   <div className="flex items-start gap-4">
                     <div className="text-5xl">{badge.icon}</div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-1">
+                      <h3 className="font-semibold text-lg mb-1 text-slate-50">
                         {badge.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <p className="text-sm text-slate-300 mb-2">
                         {badge.description}
                       </p>
                       {badge.earnedDate && (
-                        <UIBadge variant="secondary" className="text-xs">
+                        <UIBadge
+                          variant="secondary"
+                          className="text-[11px] bg-slate-800 text-slate-100 border-slate-600"
+                        >
                           Earned{" "}
                           {new Date(badge.earnedDate).toLocaleDateString(
                             "en-US",
@@ -212,21 +235,23 @@ const Rewards = () => {
 
         {/* Locked badges */}
         {lockedBadges.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Available Badges</h2>
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold text-slate-50">
+              Available badges
+            </h2>
             <div className="grid sm:grid-cols-2 gap-4">
               {lockedBadges.map((badge) => (
                 <Card
                   key={badge.id}
-                  className="p-6 opacity-60 hover:opacity-80 transition-opacity"
+                  className={`p-6 ${glassCard} opacity-70 hover:opacity-90 transition-opacity`}
                 >
                   <div className="flex items-start gap-4">
                     <div className="text-5xl grayscale">{badge.icon}</div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-1">
+                      <h3 className="font-semibold text-lg mb-1 text-slate-50">
                         {badge.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-slate-300">
                         {badge.description}
                       </p>
                     </div>
@@ -239,11 +264,11 @@ const Rewards = () => {
 
         {/* Empty state */}
         {earnedBadges.length === 0 && (
-          <Card className="p-8 text-center mt-8">
-            <p className="text-xl text-muted-foreground mb-2">
+          <Card className={`p-8 text-center ${glassCard}`}>
+            <p className="text-lg text-slate-200 mb-2">
               Start your journey to earn badges!
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-slate-300">
               Complete your daily tasks to unlock achievements.
             </p>
           </Card>

@@ -74,3 +74,25 @@ export function isDateCompleted(date: string): boolean {
   if (!log) return false;
   return (log.completedBlocks?.length ?? 0) > 0 && log.didActivity === true;
 }
+
+// NEW: helper – get today's log, always returning an object
+export function getTodayLogOrCreate(): DailyLog {
+  const today = getTodayISO();
+  const existing = getLogForDate(today);
+  if (existing) return existing;
+  const base: DailyLog = {
+    date: today,
+    completedBlocks: [],
+    didActivity: false,
+  };
+  const logs = loadLogs();
+  const newLogs = [...logs, base];
+  saveLogs(newLogs);
+  return base;
+}
+
+// NEW: helper – is today completed
+export function isTodayCompleted(): boolean {
+  const today = getTodayISO();
+  return isDateCompleted(today);
+}
