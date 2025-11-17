@@ -1,76 +1,95 @@
-# Digital Detox Hub
+Digital Detox Hub
 
 Digital Detox Hub is a simple and effective web application designed to help users reduce screen time, build healthier digital habits, and track their detox progress. It includes daily check-ins, mood tracking, rewards, supportive messages, and overall progress insights.
 
 This project was built as part of a college assignment to demonstrate frontend development, state management, UI design, and user-focused wellbeing features.
 
----
+📌 Features
+📝 1. Create Detox Plan
 
-## 📌 Features
-
-### 📝 1. Create Detox Plan
 Users can create a customized detox plan with:
-- Plan title  
-- Duration (Today only / 7 Days)  
-- Focus areas (Instagram, YouTube, Gaming, etc.)  
-- Custom focus areas  
-- Replacement activities  
-- Screen-free time blocks  
 
-Plan data is saved in **localStorage**.
+Plan title
 
----
+Duration (Today only / 7 Days)
 
-### 📅 2. Daily Check-In (Today Page)
-- Mark completed screen-free time blocks  
-- Mark whether you completed a replacement activity  
-- Select your mood (Good / Okay / Stressful / Overwhelmed)  
-- View mood-based supportive messages  
-- Everything is auto-saved in localStorage  
+Focus areas (Instagram, YouTube, Gaming, etc.)
 
----
+Custom focus areas
 
-### 📊 3. Progress Page
-- Total days  
-- Completed days  
-- Current streak  
-- Progress percentage  
-- Daily status breakdown (Completed / Partial / Missed)
+Replacement activities
 
----
+Screen-free time blocks
 
-### 🏆 4. Rewards & Badges
-- Daily completion badges  
-- 3-day / 5-day / 7-day streak badges  
-- Full-plan completion badge  
-- Earned vs Locked badges display  
+Plan data is saved in localStorage.
 
----
+📅 2. Daily Check-In (Today Page)
 
-### 💙 5. Support Page
+Mark completed screen-free time blocks
+
+Mark whether you completed a replacement activity
+
+Select your mood (Good / Okay / Stressful / Overwhelmed)
+
+View mood-based supportive messages
+
+Everything is auto-saved in localStorage
+
+📊 3. Progress Page
+
+Total days
+
+Completed days
+
+Current streak
+
+Progress percentage
+
+Daily status breakdown (Completed / Partial / Missed)
+
+🏆 4. Rewards & Badges
+
+Daily completion badges
+
+3-day / 5-day / 7-day streak badges
+
+Full-plan completion badge
+
+Earned vs Locked badges display
+
+💙 5. Support Page
+
 Includes:
-- Mood-based supportive reminder  
-- Breathing exercise  
-- Journaling prompt  
-- Grounding technique  
-- Extra wellbeing messages  
 
----
+Mood-based supportive reminder
 
-## 🛠️ Tech Stack
-- React + TypeScript  
-- Vite  
-- React Router  
-- Tailwind CSS  
-- Lucide Icons  
-- localStorage for persistence  
-- Modular utility architecture  
+Breathing exercise
 
----
+Journaling prompt
 
-## 🧱 Project Structure
+Grounding technique
 
-```text
+Extra wellbeing messages
+
+🛠️ Tech Stack
+
+React + TypeScript
+
+Vite
+
+React Router
+
+Tailwind CSS
+
+Lucide Icons
+
+localStorage for persistence
+
+Modular utility architecture
+
+
+Project Structure
+
 src/
   components/        
   pages/             
@@ -85,7 +104,7 @@ src/
     rewards.ts       
     support.ts       
 
----
+
 
 ## 🚀 **Running the Project**
 
