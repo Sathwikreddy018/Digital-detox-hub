@@ -104,3 +104,66 @@ src/
     progress.ts      # Progress & streak calculation
     rewards.ts       # Reward determination logic
     support.ts       # Support messages & exercises
+
+
+**Running the Project**
+
+**1.Clone the repository:**
+git clone https://github.com/<your-username>/Digital-detox-hub.git
+cd Digital-detox-hub
+
+**2.Install dependencies:**
+npm install
+
+**3.Start development server:**
+npm run dev
+
+**4.Open the app:**
+ http://localhost:5173/
+
+**How It Works Internally (Short Summary)**
+
+1. Plan is stored as a DetoxPlan object in localStorage.
+2. Daily logs record completed blocks, activities, and mood.
+3. Progress & streaks are computed from plan date range + logs.
+4. Rewards are generated dynamically using calculated streaks & total completions.
+5. Support messages adapt to today’s mood for a personalized experience.
+
+
+**Use Case**
+
+This project demonstrates:
+1. UI/UX design
+2. Component-based architecture
+3. React Router navigation
+4. State handling & user persistence
+5. Utility-driven code structure
+6. A complete, functioning wellbeing tool
+
+
+**Future Enhancements (Optional)**
+
+1. Cloud sync with user login
+2. Push notifications / reminders
+3. Exportable progress reports
+4. Analytics dashboard
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
