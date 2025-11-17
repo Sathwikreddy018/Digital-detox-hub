@@ -4,77 +4,103 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { loadPlan, loadLogs, saveLogs } from "@/lib/storage";
-import { DailyLog } from "@/types/detox";
-import { getMoodMessage } from "@/lib/rewards";
 import Navbar from "@/components/Navbar";
 import { Clock, Heart } from "lucide-react";
 
+import { DailyLog, DetoxPlan, Mood } from "@/types/detox";
+
+// NEW IMPORTS (replaces old ones)
+import { loadPlan, loadLogs, saveLogs } from "@/utils/storage";
+import { getSupportMessage } from "@/utils/support";
+
 const Today = () => {
-  const [plan] = useState(() => loadPlan());
-  const [logs, setLogs] = useState(() => loadLogs());
+  const [plan, setPlan] = useState<DetoxPlan | null>(null);
+  const [logs, setLogs] = useState<DailyLog[]>([]);
   const today = new Date().toISOString().split("T")[0];
 
+  useEffect(() => {
+    setPlan(loadPlan());
+    setLogs(loadLogs());
+  }, []);
+
+  // Find today's log
   const todayLog = logs.find((log) => log.date === today);
 
+  // Auto-save logs when changed
   useEffect(() => {
     saveLogs(logs);
   }, [logs]);
 
+  // Toggle time block
   const handleBlockToggle = (blockId: string) => {
     setLogs((prevLogs) => {
       const existingLogIndex = prevLogs.findIndex((log) => log.date === today);
-      
+
       if (existingLogIndex >= 0) {
-        const updatedLogs = [...prevLogs];
-        const completedBlocks = updatedLogs[existingLogIndex].completedBlocks;
-        
-        if (completedBlocks.includes(blockId)) {
-          updatedLogs[existingLogIndex].completedBlocks = completedBlocks.filter((id) => id !== blockId);
-        } else {
-          updatedLogs[existingLogIndex].completedBlocks = [...completedBlocks, blockId];
-        }
-        
-        return updatedLogs;
-      } else {
-        return [...prevLogs, { date: today, completedBlocks: [blockId], didActivity: false }];
+        const updated = [...prevLogs];
+        const blocks = updated[existingLogIndex].completedBlocks;
+
+        updated[existingLogIndex].completedBlocks = blocks.includes(blockId)
+          ? blocks.filter((id) => id !== blockId)
+          : [...blocks, blockId];
+
+        return updated;
       }
+
+      // No log for today → create one
+      return [
+        ...prevLogs,
+        { date: today, completedBlocks: [blockId], didActivity: false },
+      ];
     });
   };
 
+  // Toggle activity
   const handleActivityToggle = () => {
     setLogs((prevLogs) => {
-      const existingLogIndex = prevLogs.findIndex((log) => log.date === today);
-      
-      if (existingLogIndex >= 0) {
-        const updatedLogs = [...prevLogs];
-        updatedLogs[existingLogIndex].didActivity = !updatedLogs[existingLogIndex].didActivity;
-        return updatedLogs;
-      } else {
-        return [...prevLogs, { date: today, completedBlocks: [], didActivity: true }];
+      const idx = prevLogs.findIndex((log) => log.date === today);
+
+      if (idx >= 0) {
+        const updated = [...prevLogs];
+        updated[idx].didActivity = !updated[idx].didActivity;
+        return updated;
       }
+
+      return [
+        ...prevLogs,
+        { date: today, completedBlocks: [], didActivity: true },
+      ];
     });
   };
 
-  const handleMoodChange = (mood: "good" | "okay" | "stressful" | "overwhelmed") => {
+  // Mood update
+  const handleMoodChange = (mood: Mood) => {
     setLogs((prevLogs) => {
-      const existingLogIndex = prevLogs.findIndex((log) => log.date === today);
-      
-      if (existingLogIndex >= 0) {
-        const updatedLogs = [...prevLogs];
-        updatedLogs[existingLogIndex].mood = mood;
-        return updatedLogs;
-      } else {
-        return [...prevLogs, { date: today, completedBlocks: [], didActivity: false, mood }];
+      const idx = prevLogs.findIndex((log) => log.date === today);
+
+      if (idx >= 0) {
+        const updated = [...prevLogs];
+        updated[idx].mood = mood;
+        return updated;
       }
+
+      return [
+        ...prevLogs,
+        { date: today, completedBlocks: [], didActivity: false, mood },
+      ];
     });
   };
+
+  // Compute gentle support message
+  const supportMessage = todayLog?.mood
+    ? getSupportMessage(todayLog.mood)
+    : null;
 
   if (!plan) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        
+
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Card className="p-8 text-center">
             <h2 className="text-2xl font-bold mb-4">No Detox Plan Yet</h2>
@@ -96,21 +122,25 @@ const Today = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">{plan.title}</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            {plan.title}
+          </h1>
           <p className="text-muted-foreground">
-            {new Date(today).toLocaleDateString("en-US", { 
-              weekday: "long", 
-              year: "numeric", 
-              month: "long", 
-              day: "numeric" 
+            {new Date(today).toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
             })}
           </p>
         </div>
 
         <div className="grid gap-6">
+          {/* Summary */}
           <Card className="p-6">
             <h2 className="text-lg font-semibold mb-4">Today's Summary</h2>
             <div className="space-y-3">
@@ -120,6 +150,7 @@ const Today = () => {
                   {completedBlocksCount}/{totalBlocks}
                 </span>
               </div>
+
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Activity completed:</span>
                 <span className="font-semibold">
@@ -129,6 +160,7 @@ const Today = () => {
             </div>
           </Card>
 
+          {/* Focus areas */}
           {plan.focusAreas.length > 0 && (
             <Card className="p-6">
               <h2 className="text-lg font-semibold mb-3">Focus Areas</h2>
@@ -142,12 +174,16 @@ const Today = () => {
             </Card>
           )}
 
+          {/* Activities */}
           {plan.activities.length > 0 && (
             <Card className="p-6">
               <h2 className="text-lg font-semibold mb-3">Replacement Activities</h2>
               <ul className="space-y-2">
                 {plan.activities.map((activity, idx) => (
-                  <li key={idx} className="flex items-center gap-2 text-muted-foreground">
+                  <li
+                    key={idx}
+                    className="flex items-center gap-2 text-muted-foreground"
+                  >
                     <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                     {activity}
                   </li>
@@ -156,12 +192,14 @@ const Today = () => {
             </Card>
           )}
 
+          {/* Time blocks */}
           <Card className="p-6">
             <h2 className="text-lg font-semibold mb-4">Screen-Free Time Blocks</h2>
             <div className="space-y-3">
               {plan.timeBlocks.map((block) => {
-                const isCompleted = todayLog?.completedBlocks.includes(block.id) || false;
-                
+                const isCompleted =
+                  todayLog?.completedBlocks.includes(block.id) || false;
+
                 return (
                   <div
                     key={block.id}
@@ -186,6 +224,7 @@ const Today = () => {
             </div>
           </Card>
 
+          {/* Activity toggle */}
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -201,6 +240,7 @@ const Today = () => {
             </div>
           </Card>
 
+          {/* Mood selection */}
           <Card className="p-6">
             <div className="mb-4">
               <h2 className="text-lg font-semibold mb-2">How are you feeling?</h2>
@@ -208,6 +248,7 @@ const Today = () => {
                 Check in with yourself today
               </p>
             </div>
+
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { value: "good", label: "Good", emoji: "😊" },
@@ -217,11 +258,7 @@ const Today = () => {
               ].map((mood) => (
                 <button
                   key={mood.value}
-                  onClick={() =>
-                    handleMoodChange(
-                      mood.value as "good" | "okay" | "stressful" | "overwhelmed"
-                    )
-                  }
+                  onClick={() => handleMoodChange(mood.value as Mood)}
                   className={`p-4 rounded-lg border-2 transition-all hover:scale-105 ${
                     todayLog?.mood === mood.value
                       ? "border-primary bg-primary/10"
@@ -235,15 +272,16 @@ const Today = () => {
             </div>
           </Card>
 
-          {todayLog?.mood && (
+          {/* Support message */}
+          {supportMessage && (
             <Card className="p-6 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
               <div className="flex items-start gap-3">
                 <Heart className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                 <div>
-                  <h3 className="font-semibold mb-2">A gentle reminder</h3>
-                  <p className="text-muted-foreground">
-                    {getMoodMessage(todayLog.mood)}
-                  </p>
+                  <h3 className="font-semibold mb-2">
+                    {supportMessage.title}
+                  </h3>
+                  <p className="text-muted-foreground">{supportMessage.body}</p>
                 </div>
               </div>
             </Card>

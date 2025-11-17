@@ -15,12 +15,16 @@ export type DetoxPlan = {
   timeBlocks: TimeBlock[];
 };
 
+export type Mood = "good" | "okay" | "stressful" | "overwhelmed";
+
 export type DailyLog = {
   date: string;
   completedBlocks: string[];
   didActivity: boolean;
-  mood?: "good" | "okay" | "stressful" | "overwhelmed";
+  mood?: Mood;
 };
+
+export type RewardType = "daily" | "streak" | "milestone";
 
 export type Badge = {
   id: string;
@@ -29,6 +33,7 @@ export type Badge = {
   icon: string;
   earned: boolean;
   earnedDate?: string;
+  type?: RewardType; // identifies daily / streak / milestone
 };
 
 export type RewardData = {
@@ -36,4 +41,9 @@ export type RewardData = {
   totalDaysCompleted: number;
   currentStreak: number;
   longestStreak: number;
+};
+
+export type SupportMessage = {
+  title: string;
+  body: string;
 };
