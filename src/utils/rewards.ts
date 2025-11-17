@@ -1,56 +1,87 @@
-import type { Badge, RewardData } from "../types/detox";
-import { loadPlan, loadLogs, saveRewardData, loadRewardData } from "./storage";
+import type { RewardData, Badge, DetoxPlan, DailyLog } from "@/types/detox";
+import { loadPlan, loadLogs, loadRewardData, saveRewardData } from "./storage";
 import { eachDayBetween, getTodayISO, minISO } from "./dates";
-import { isDateCompleted } from "./today";
 
-const STREAK_THRESHOLDS = [3, 5, 7];
+/* ---------- Check if a day is completed ---------- */
+function isDateCompleted(log: DailyLog | undefined): boolean {
+  if (!log) return false;
+  return (log.completedBlocks?.length ?? 0) > 0 && log.didActivity === true;
+}
 
-function calculateStreak(dates: string[]): { current: number; longest: number } {
-  let current = 0;
+/* ---------- Calculate current streak ---------- */
+function calculateStreak(dates: string[], logMap: Record<string, DailyLog>): number {
+  let streak = 0;
+
+  for (let i = dates.length - 1; i >= 0; i--) {
+    const log = logMap[dates[i]];
+    if (isDateCompleted(log)) streak++;
+    else break;
+  }
+
+  return streak;
+}
+
+/* ---------- Calculate longest streak ---------- */
+function calculateLongestStreak(dates: string[], logMap: Record<string, DailyLog>): number {
   let longest = 0;
+  let current = 0;
 
   for (const date of dates) {
-    if (isDateCompleted(date)) {
-      current += 1;
+    if (isDateCompleted(logMap[date])) {
+      current++;
       if (current > longest) longest = current;
     } else {
       current = 0;
     }
   }
 
-  return { current, longest };
+  return longest;
 }
 
+/* ---------- MAIN: calculateRewardData ---------- */
 export function calculateRewardData(): RewardData {
-  const plan = loadPlan();
-  const logs = loadLogs();
+  const plan: DetoxPlan | null = loadPlan();
+  const logs: DailyLog[] = loadLogs();
 
+  const prev = loadRewardData();
+
+  // No plan → return empty structure but keep grace day info
   if (!plan) {
     const empty: RewardData = {
       badges: [],
       totalDaysCompleted: 0,
       currentStreak: 0,
       longestStreak: 0,
+      graceDayUsed: prev.graceDayUsed ?? false,
+      graceDayDate: prev.graceDayDate,
     };
     saveRewardData(empty);
     return empty;
   }
 
   const today = getTodayISO();
-  const effectiveEnd = minISO(plan.endDate, today);
-  const dates = eachDayBetween(plan.startDate, effectiveEnd);
+  const end = minISO(plan.endDate, today);
+  const dates = eachDayBetween(plan.startDate, end);
 
-  const badges: Badge[] = [];
+  // Map logs by date for quick access
+  const logMap: Record<string, DailyLog> = {};
+  logs.forEach((l) => {
+    logMap[l.date] = l;
+  });
+
   let totalDaysCompleted = 0;
+  const badges: Badge[] = [];
 
-  // Daily completion badges
+  // --- Daily completion badges ---
   dates.forEach((date, index) => {
-    if (isDateCompleted(date)) {
-      totalDaysCompleted += 1;
+    const log = logMap[date];
+    if (isDateCompleted(log)) {
+      totalDaysCompleted++;
+
       badges.push({
-        id: `daily-${date}`,
-        name: `Day ${index + 1} Complete`,
-        description: `You completed your detox tasks on ${date}.`,
+        id: `day-${date}`,
+        name: `Day ${index + 1} Completed`,
+        description: `You completed the detox tasks on ${date}.`,
         icon: "✅",
         earned: true,
         earnedDate: date,
@@ -59,15 +90,17 @@ export function calculateRewardData(): RewardData {
     }
   });
 
-  const { current, longest } = calculateStreak(dates);
+  // --- Streaks ---
+  const currentStreak = calculateStreak(dates, logMap);
+  const longestStreak = calculateLongestStreak(dates, logMap);
 
-  // Streak badges
-  STREAK_THRESHOLDS.forEach((threshold) => {
-    if (longest >= threshold) {
+  const streakThresholds = [3, 5, 7];
+  streakThresholds.forEach((t) => {
+    if (longestStreak >= t) {
       badges.push({
-        id: `streak-${threshold}`,
-        name: `${threshold}-Day Streak`,
-        description: `You maintained your detox streak for ${threshold} days.`,
+        id: `streak-${t}`,
+        name: `${t}-Day Streak`,
+        description: `You stayed consistent for ${t} days!`,
         icon: "🔥",
         earned: true,
         earnedDate: today,
@@ -76,38 +109,53 @@ export function calculateRewardData(): RewardData {
     }
   });
 
-  // Milestone badge: completed full plan
-  const allCompleted = dates.length > 0 && dates.every((d) => isDateCompleted(d));
-  if (allCompleted) {
+  // --- Milestone: full plan completion ---
+  const fullyCompleted =
+    dates.length > 0 && dates.every((d) => isDateCompleted(logMap[d]));
+
+  if (fullyCompleted) {
     badges.push({
       id: "milestone-full-plan",
       name: "Full Plan Completed",
-      description: "You completed every day of your detox plan.",
+      description: "You completed every day of your detox plan!",
       icon: "🏆",
       earned: true,
-      earnedDate: dates[dates.length - 1],
+      earnedDate: today,
       type: "milestone",
     });
   }
 
-  // Deduplicate badges by id (in case of recompute)
-  const map = new Map<string, Badge>();
-  for (const b of badges) {
-    map.set(b.id, b);
-  }
-  const uniqueBadges = Array.from(map.values());
+  // Deduplicate badges by id
+  const uniqueBadges = Array.from(
+    new Map<string, Badge>(badges.map((b) => [b.id, b])).values()
+  );
 
-  const rewardData: RewardData = {
+  const result: RewardData = {
     badges: uniqueBadges,
     totalDaysCompleted,
-    currentStreak: current,
-    longestStreak: longest,
+    currentStreak,
+    longestStreak,
+    graceDayUsed: prev.graceDayUsed ?? false,
+    graceDayDate: prev.graceDayDate ?? undefined,
   };
 
-  saveRewardData(rewardData);
-  return rewardData;
+  saveRewardData(result);
+  return result;
 }
 
-export function getStoredRewardData(): RewardData {
-  return loadRewardData();
+/* ---------- Grace Day Logic ---------- */
+export function useGraceDayForToday(): RewardData {
+  const current = loadRewardData();
+  if (current.graceDayUsed) return current;
+
+  const today = getTodayISO();
+
+  const updated: RewardData = {
+    ...current,
+    graceDayUsed: true,
+    graceDayDate: today,
+  };
+
+  saveRewardData(updated);
+  return updated;
 }

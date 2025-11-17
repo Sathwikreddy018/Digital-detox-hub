@@ -40,6 +40,14 @@ const Navbar = () => {
             >
               Rewards
             </NavLink>
+            {/* 🚀 New Wallet Link Added Here */}
+            <NavLink
+              to="/wallet"
+              className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              activeClassName="text-primary bg-primary/10"
+            >
+              Reward Wallet
+            </NavLink>
             <NavLink
               to="/support"
               className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"

@@ -10,6 +10,8 @@ import ProgressPage from "./pages/Progress";
 import Rewards from "./pages/Rewards";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
+import RewardWallet from "@/pages/RewardWallet";
+
 
 const queryClient = new QueryClient();
 
@@ -26,6 +28,7 @@ const App = () => (
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/rewards" element={<Rewards />} />
           <Route path="/support" element={<Support />} />
+          <Route path="/wallet" element={<RewardWallet />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

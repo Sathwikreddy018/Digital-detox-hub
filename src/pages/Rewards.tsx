@@ -1,22 +1,23 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge as UIBadge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
-import { Trophy, Award, Flame } from "lucide-react";
+import { Trophy, Award, Flame, HeartHandshake } from "lucide-react";
 
 import { loadPlan } from "@/utils/storage";
-import { calculateRewardData } from "@/utils/rewards";
-import type { Badge as BadgeType } from "@/types/detox";
+import { calculateRewardData, useGraceDayForToday } from "@/utils/rewards";
+import type { Badge as BadgeType, RewardData } from "@/types/detox";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const Rewards = () => {
   const plan = loadPlan();
-  const rewards = calculateRewardData(); // uses plan + logs from storage
+  const [rewards, setRewards] = useState<RewardData>(() =>
+    calculateRewardData()
+  );
 
-  // All earned badges from RewardData (daily + streak + milestone)
   const earnedBadges = rewards.badges;
 
-  // Define a few "goal" badges to show as locked if not earned
   const predefinedBadges: BadgeType[] = [
     {
       id: "streak-3",
@@ -55,7 +56,6 @@ const Rewards = () => {
   const earnedIds = new Set(earnedBadges.map((b) => b.id));
   const lockedBadges = predefinedBadges.filter((b) => !earnedIds.has(b.id));
 
-  // If there is no plan at all
   if (!plan) {
     return (
       <div className="min-h-screen bg-background">
@@ -74,6 +74,12 @@ const Rewards = () => {
       </div>
     );
   }
+
+  const handleUseGraceDay = () => {
+    if (rewards.graceDayUsed) return;
+    const updated = useGraceDayForToday();
+    setRewards(updated);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -130,6 +136,41 @@ const Rewards = () => {
           </Card>
         </div>
 
+        {/* Grace Day card */}
+        <Card className="p-6 mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <HeartHandshake className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold">Grace Day</h2>
+              <p className="text-sm text-muted-foreground">
+                Once per plan, you can use a Grace Day to be kind to yourself if
+                you miss a day.
+              </p>
+            </div>
+          </div>
+          {rewards.graceDayUsed ? (
+            <p className="text-sm text-muted-foreground">
+              Grace Day already used on{" "}
+              <span className="font-medium">
+                {rewards.graceDayDate
+                  ? new Date(rewards.graceDayDate).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })
+                  : "this plan"}
+              </span>
+              .
+            </p>
+          ) : (
+            <Button variant="outline" onClick={handleUseGraceDay}>
+              Use my Grace Day
+            </Button>
+          )}
+        </Card>
+
         {/* Earned badges */}
         {earnedBadges.length > 0 && (
           <div className="mb-8">
@@ -169,7 +210,7 @@ const Rewards = () => {
           </div>
         )}
 
-        {/* Locked / available badges */}
+        {/* Locked badges */}
         {lockedBadges.length > 0 && (
           <div>
             <h2 className="text-2xl font-semibold mb-4">Available Badges</h2>
@@ -196,7 +237,7 @@ const Rewards = () => {
           </div>
         )}
 
-        {/* If no badges at all */}
+        {/* Empty state */}
         {earnedBadges.length === 0 && (
           <Card className="p-8 text-center mt-8">
             <p className="text-xl text-muted-foreground mb-2">

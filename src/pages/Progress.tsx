@@ -3,10 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import Navbar from "@/components/Navbar";
-import { CheckCircle2, XCircle, TrendingUp } from "lucide-react";
+import { CheckCircle2, XCircle, TrendingUp, Activity } from "lucide-react";
 
 import { loadPlan, loadLogs } from "@/utils/storage";
-import { calculateProgress } from "@/utils/progress";
 
 const ProgressPage = () => {
   const plan = loadPlan();
@@ -32,10 +31,52 @@ const ProgressPage = () => {
     );
   }
 
-  // Use shared progress logic
-  const stats = calculateProgress();
+  // Reuse your previous stats logic quickly
+  const getStats = (planStartDate: string, planEndDate: string, logs: any[]) => {
+    const start = new Date(planStartDate);
+    const end = new Date(planEndDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const actualEnd = end < today ? end : today;
+
+    const totalDays =
+      Math.floor(
+        (actualEnd.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    const completedDays = logs.filter((log) => {
+      const logDate = new Date(log.date);
+      return (
+        logDate >= start &&
+        logDate <= actualEnd &&
+        log.completedBlocks.length > 0 &&
+        log.didActivity
+      );
+    }).length;
+
+    let streak = 0;
+    const todayStr = today.toISOString().split("T")[0];
+    let currentDate = new Date(todayStr);
+
+    while (currentDate >= start) {
+      const dateStr = currentDate.toISOString().split("T")[0];
+      const log = logs.find((l) => l.date === dateStr);
+
+      if (log && log.completedBlocks.length > 0 && log.didActivity) {
+        streak++;
+        currentDate.setDate(currentDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    return { totalDays: Math.max(totalDays, 0), completedDays, streak };
+  };
+
+  const stats = getStats(plan.startDate, plan.endDate, logs);
   const progressPercentage =
-    stats.totalDays > 0 ? stats.completionRate * 100 : 0;
+    stats.totalDays > 0 ? (stats.completedDays / stats.totalDays) * 100 : 0;
 
   const getDayStatus = (dateStr: string) => {
     const log = logs.find((l) => l.date === dateStr);
@@ -63,6 +104,49 @@ const ProgressPage = () => {
   };
 
   const daysList = generateDaysList();
+
+  // WEEKLY SUMMARY (last 7 days)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const sevenDaysAgo = new Date(today);
+  sevenDaysAgo.setDate(today.getDate() - 6);
+
+  let weeklyBlocks = 0;
+  let weeklyDaysWithActivity = 0;
+  const moodCounts: Record<string, number> = {};
+  const triggerCounts: Record<string, number> = {};
+
+  logs.forEach((log) => {
+    const d = new Date(log.date);
+    if (d < sevenDaysAgo || d > today) return;
+
+    // blocks
+    weeklyBlocks += log.completedBlocks?.length ?? 0;
+    // activity days
+    if (log.didActivity) weeklyDaysWithActivity++;
+
+    // mood
+    if (log.mood) {
+      moodCounts[log.mood] = (moodCounts[log.mood] || 0) + 1;
+    }
+
+    // triggers
+    if (log.triggers && Array.isArray(log.triggers)) {
+      log.triggers.forEach((t: string) => {
+        triggerCounts[t] = (triggerCounts[t] || 0) + 1;
+      });
+    }
+  });
+
+  const mostCommonMood =
+    Object.keys(moodCounts).length === 0
+      ? "No data"
+      : Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0][0];
+
+  const topTriggers = Object.entries(triggerCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([name, count]) => `${name} (${count})`);
 
   return (
     <div className="min-h-screen bg-background">
@@ -120,13 +204,62 @@ const ProgressPage = () => {
                   <p className="text-2xl font-bold">
                     {Math.round(progressPercentage)}%
                   </p>
-                  <p className="text-sm text-muted-foreground">Total Progress</p>
+                  <p className="text-sm text-muted-foreground">
+                    Total Progress
+                  </p>
                 </div>
               </div>
             </Card>
           </div>
 
-          {/* Overall progress bar */}
+          {/* Weekly summary */}
+          <Card className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <Activity className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-lg font-semibold">Weekly Summary (Last 7 days)</h2>
+            </div>
+            <div className="grid sm:grid-cols-3 gap-4 text-sm">
+              <div>
+                <p className="text-muted-foreground">Blocks completed</p>
+                <p className="text-xl font-semibold">{weeklyBlocks}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">
+                  Days with replacement activity
+                </p>
+                <p className="text-xl font-semibold">
+                  {weeklyDaysWithActivity}
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Most common mood</p>
+                <p className="text-xl font-semibold capitalize">
+                  {mostCommonMood}
+                </p>
+              </div>
+            </div>
+            {topTriggers.length > 0 && (
+              <div className="mt-4">
+                <p className="text-sm text-muted-foreground mb-1">
+                  Top triggers this week:
+                </p>
+                <div className="flex flex-wrap gap-2 text-sm">
+                  {topTriggers.map((t) => (
+                    <span
+                      key={t}
+                      className="px-3 py-1 rounded-full bg-muted text-foreground"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </Card>
+
+          {/* Overall progress */}
           <Card className="p-6">
             <h2 className="text-lg font-semibold mb-4">Overall Progress</h2>
             <div className="space-y-2">
@@ -142,7 +275,7 @@ const ProgressPage = () => {
             </div>
           </Card>
 
-          {/* Daily breakdown grid */}
+          {/* Daily breakdown */}
           <Card className="p-6">
             <h2 className="text-lg font-semibold mb-4">Daily Breakdown</h2>
             <div className="grid grid-cols-7 gap-2">
@@ -171,7 +304,6 @@ const ProgressPage = () => {
                 );
               })}
             </div>
-
             <div className="flex items-center justify-center gap-6 mt-6 text-sm">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-success" />

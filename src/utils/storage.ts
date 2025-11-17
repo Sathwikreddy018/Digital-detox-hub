@@ -53,8 +53,11 @@ export function loadRewardData(): RewardData {
     totalDaysCompleted: 0,
     currentStreak: 0,
     longestStreak: 0,
+    graceDayUsed: false,
+    graceDayDate: undefined,
   });
 }
+
 
 export function saveRewardData(data: RewardData): void {
   saveToStorage<RewardData>(REWARD_DATA_KEY, data);
