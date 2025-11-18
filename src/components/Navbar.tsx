@@ -1,16 +1,17 @@
 import { NavLink } from "@/components/NavLink";
-import { Waves, Leaf } from "lucide-react";
+import { Waves, Leaf, Bell } from "lucide-react";
+import { useAlarmRunner } from "@/hooks/useAlarmRunner";
 
 const Navbar = () => {
+  // Run alarm checks globally while the app is open
+  useAlarmRunner();
+
   return (
     <nav className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-3">
           {/* Brand */}
-          <NavLink
-            to="/"
-            className="flex items-center gap-2 group"
-          >
+          <NavLink to="/" className="flex items-center gap-2 group">
             <div className="relative">
               <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-emerald-500/60 to-cyan-500/60 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.35)]">
                 <Waves className="w-4 h-4 text-slate-950" />
@@ -53,7 +54,6 @@ const Navbar = () => {
                 Progress
               </NavLink>
 
-              {/* New Focus Garden link */}
               <NavLink
                 to="/focus-garden"
                 className="px-2 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-medium text-slate-300 hover:text-slate-50 hover:bg-slate-800/80 transition-colors"
@@ -79,6 +79,18 @@ const Navbar = () => {
                 activeClassName="text-slate-50 bg-primary/20 shadow-sm"
               >
                 Reward Wallet
+              </NavLink>
+
+              {/* New Alarms link */}
+              <NavLink
+                to="/alarms"
+                className="px-2 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-medium text-slate-300 hover:text-slate-50 hover:bg-slate-800/80 transition-colors"
+                activeClassName="text-slate-50 bg-primary/20 shadow-sm"
+              >
+                <span className="flex items-center gap-1">
+                  <Bell className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Alarms</span>
+                </span>
               </NavLink>
 
               <NavLink
