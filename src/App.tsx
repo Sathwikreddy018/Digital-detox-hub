@@ -1,44 +1,85 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import CreatePlan from "./pages/CreatePlan";
-import Today from "./pages/Today";
-import ProgressPage from "./pages/Progress";
-import Rewards from "./pages/Rewards";
-import Support from "./pages/Support";
-import NotFound from "./pages/NotFound";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import Home from "@/pages/Home";
+import Today from "@/pages/Today";
+import ProgressPage from "@/pages/Progress";
+import Rewards from "@/pages/Rewards";
 import RewardWallet from "@/pages/RewardWallet";
+import Support from "@/pages/Support";
 import FocusGarden from "@/pages/FocusGarden";
 import Alarms from "@/pages/Alarms";
+import AuthPage from "@/pages/Auth";
 
+import { RequireAuth } from "@/components/RequireAuth";
 
-const queryClient = new QueryClient();
+function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<Home />} />
+        <Route path="/auth" element={<AuthPage />} />
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/create-plan" element={<CreatePlan />} />
-          <Route path="/today" element={<Today />} />
-          <Route path="/progress" element={<ProgressPage />} />
-          <Route path="/rewards" element={<Rewards />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/wallet" element={<RewardWallet />} />
-          <Route path="/focus-garden" element={<FocusGarden />} />
-          <Route path="/alarms" element={<Alarms />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+        {/* Protected */}
+        <Route
+          path="/today"
+          element={
+            <RequireAuth>
+              <Today />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/progress"
+          element={
+            <RequireAuth>
+              <ProgressPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/rewards"
+          element={
+            <RequireAuth>
+              <Rewards />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/wallet"
+          element={
+            <RequireAuth>
+              <RewardWallet />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/focus-garden"
+          element={
+            <RequireAuth>
+              <FocusGarden />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/alarms"
+          element={
+            <RequireAuth>
+              <Alarms />
+            </RequireAuth>
+          }
+        />
+
+        {/* Support page stays public */}
+        <Route path="/support" element={<Support />} />
+      </Routes>
+    </Router>
+  );
+}
 
 export default App;
